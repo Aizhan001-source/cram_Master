@@ -15,3 +15,4 @@ class Student(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), unique=True, nullable=False)
 
     bookings = relationship("Booking", back_populates="student")    
+    user = relationship("User", back_populates="student")

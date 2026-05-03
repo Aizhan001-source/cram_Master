@@ -35,6 +35,7 @@ class User(Base):
     role_id = Column(UUID(as_uuid=True),  ForeignKey("roles.id"), nullable=False)
     
     tutor = relationship("Tutor", back_populates="user", uselist=False)
+    student = relationship("Student", back_populates="user", uselist=False)
 
     sent_messages =  relationship("Message", foreign_keys="Message.sender_id", back_populates="sender")
     received_messages =  relationship("Message", foreign_keys="Message.receiver_id", back_populates="receiver")

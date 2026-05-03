@@ -1,3 +1,5 @@
+from http.client import HTTPException
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from uuid import UUID
@@ -13,19 +15,20 @@ class UserRepository:
 
     async def register_user(self, first_name, last_name, email, hashed_password):
         result = await self.db.execute(
-            select(Role).where(
-                (Role.name == "conditer")
-            )
+            select(Role).where(Role.name == "student")
         )
         role_object = result.scalar_one_or_none()
+
+        if not role_object:
+            raise HTTPException(status_code=500, detail="Role 'student' not found")
         
         user = User(
-            first_name = first_name, 
-            last_name = last_name, 
-            email = email, 
-            password = hashed_password,
-            role_id=role_object.id,
-        )
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        password_hash=hashed_password,  # ✔ ВОТ ТАК
+        role_id=role_object.id,
+    )
 
         self.db.add(user)
 
