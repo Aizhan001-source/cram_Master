@@ -8,11 +8,14 @@ class StudentService:
     def __init__(self, db: AsyncSession):
         self.repo = StudentRepository(db)
 
-    async def create_student(self, user_id):
-        existing = await self.repo.get_by_user_id(UUID(str(user_id)))
+    async def create_student(self, user_id: UUID):
+
+        existing = await self.repo.get_by_user_id(user_id)
+
         if existing:
-            raise HTTPException(400, "Student already exists")
-        return await self.repo.create(UUID(str(user_id)))
+            raise HTTPException(status_code=400, detail="Student already exists")
+
+        return await self.repo.create(user_id)
 
     async def get_student(self, student_id):
         student = await self.repo.get_by_id(student_id)

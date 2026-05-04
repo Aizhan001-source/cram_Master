@@ -11,9 +11,11 @@ class StudentRepository:
 
     async def create(self, user_id: UUID) -> Student:
         student = Student(user_id=user_id)
+
         self.session.add(student)
-        await self.session.commit()
-        await self.session.refresh(student)
+
+        await self.session.flush()
+
         return student
 
     async def get_by_id(self, student_id: UUID):

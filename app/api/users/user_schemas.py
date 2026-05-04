@@ -18,6 +18,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     role_id: UUID
+    education_id: UUID | None = None 
 
 
 class UserLogin(BaseModel):
@@ -56,6 +57,20 @@ class UserAdminCreate(BaseModel):
     password: str
     avatar_url: Optional[str]
     role: str
+
+
+class TutorRegister(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    password: str
+    education_id: UUID
+
+class StudentRegister(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    password: str
 
 class UserProfileRead(BaseModel):
     first_name: str

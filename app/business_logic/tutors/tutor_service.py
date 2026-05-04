@@ -13,6 +13,12 @@ class TutorService:
     def __init__(self, repo: TutorRepository):
         self.repo = repo
 
+    async def create_tutor(self, user_id: UUID, education_id: UUID):
+        return await self.repo.create_tutor(
+            user_id=user_id,
+            education_id=education_id
+        )
+
     async def get_all_tutors(self):
         return await self.repo.get_all_tutors()
 
