@@ -3,7 +3,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.users.user_schemas import UserAdminCreate, UserCreate, UserLogin, UserRead
 from utils.auth_middleware import get_current_user
 from business_logic.users.user_service import UserService
+from business_logic.email_service import send_email
+from core.security import create_reset_token, decode_reset_token
 from data_access.db.session import get_db
+from data_access.db.models.user import User
+from sqlalchemy import select
 
 router = APIRouter()
 def get_user_service(db: AsyncSession = Depends(get_db)) -> UserService:
@@ -15,7 +19,7 @@ async def user_register(
     user: UserCreate,
     service: UserService = Depends(get_user_service),
 ):
-    return await service.register_user(user.first_name, user.last_name, user.email, user.password)
+    return await service.register_user(user.first_name, user.last_name, user.email, user.password, user.role_id)
 
 
 @router.post("/login")
@@ -50,3 +54,36 @@ async def get_user_profile(
         raise HTTPException(status_code=404, detail="User not found")
     
     return result
+
+@router.post("/forgot-password")
+async def forgot_password(email: str, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.email == email))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return {"message": "If email exists, link sent"}
+
+    token = create_reset_token({"sub": str(user.id)})
+
+    link = f"http://localhost:3000/reset-password?token={token}"
+
+    send_email(email, link)
+
+    return {"message": "Check your email"}
+
+@router.post("/reset-password")
+async def reset_password(
+    token: str,
+    new_password: str,
+    db: AsyncSession = Depends(get_db)
+):
+    payload = decode_reset_token(token)
+    user_id = payload.get("user_id")
+
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one()
+
+    user.password = new_password  # ❗ лучше захешировать
+    await db.commit()
+
+    return {"message": "Password updated"}

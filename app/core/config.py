@@ -1,20 +1,26 @@
 import os
 from pydantic_settings import BaseSettings
 
-
 class Settings(BaseSettings):
-    APP_NAME: str = "FastApi App"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    SECRET_KEY: str
+    ALGORITHM: str = "HS256"
+
+    class Config:
+        env_file = ".env"
+        
+    UPLOADS_DIR: str = "uploads"
+    # app
+    APP_NAME: str = "FastAPI App"
     DEBUG: bool = True
-    HOST: str = "172.0.0.1"
+
+    HOST: str = "127.0.0.1"
     PORT: int = 8000
 
-    SECRET_KEY: str = "SUPER_SECRET_KEY_CHANGE_ME"
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 дней вместо 30 минут
-
+    # database
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
-    DB_NAME: str = "platform"
+    DB_NAME: str = "tutor_db"
     DB_USER: str = "postgres"
     DB_PASSWORD: str = "postgres"
 

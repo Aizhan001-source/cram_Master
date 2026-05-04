@@ -1,44 +1,35 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from datetime import datetime
+from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import datetime, timedelta
 
 from data_access.db.models.schedule import Schedule
-from data_access.db.models.tutor import Tutor
+from data_access.db.models.course import Course
 
 
 async def seed_schedules(db: AsyncSession):
+    courses = (await db.execute(select(Course))).scalars().all()
 
-    tutors = (await db.execute(select(Tutor))).scalars().all()
-
-    if not tutors:
-        print("❌ No tutors found")
+    if not courses:
+        print("No courses found")
         return
 
-    created = 0
+    now = datetime.utcnow()
 
-    start_dt = datetime(2026, 1, 1, 10, 0, 0)
-    end_dt = datetime(2026, 1, 1, 11, 0, 0)
+    for i, course in enumerate(courses):
+        result = await db.execute(
+            select(Schedule).where(Schedule.course_id == course.id)
+        )
+        exists = result.scalar_one_or_none()
 
-    for tutor in tutors:
-
-        exists = (await db.execute(
-            select(Schedule).where(
-                Schedule.course_id == tutor.id,
-                Schedule.start_time == start_dt
+        if not exists:
+            db.add(
+                Schedule(
+                    course_id=course.id,
+                    start_time=now + timedelta(days=i),
+                    end_time=now + timedelta(days=i, hours=1),
+                    is_available=True,
+                )
             )
-        )).scalar_one_or_none()
-
-        if exists:
-            continue
-
-        db.add(Schedule(
-            course_id=tutor.id,
-            start_time=start_dt,
-            end_time=end_dt,
-            is_available=True
-        ))
-
-        created += 1
 
     await db.commit()
-    print(f"✅ schedules seeded: {created}")
+    print("Schedules seeded!")

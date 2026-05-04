@@ -9,12 +9,11 @@ from alembic import context
 
 from core.config import settings
 from data_access.db.base import Base
-from data_access.db import models  # важно! импортируем ВСЕ модели
+from data_access.db import models  
 
-# Alembic Config
 config = context.config
 
-# Логи
+
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 

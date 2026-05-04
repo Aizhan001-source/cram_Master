@@ -8,6 +8,7 @@ from api.bookings.booking_api import router as booking_router
 from api.reviews.review_api import router as review_router
 from api.courses.course_api import router as course_router
 from api.subjects.subject_api import router as subject_router
+from api.roles.role_api import router as role_api
 
 
 api_router = APIRouter()
@@ -64,4 +65,10 @@ api_router.include_router(
     subject_router,
     prefix="/subjects",
     tags=["SUBJECTS"]
+)
+
+api_router.include_router(
+    role_api,
+    prefix="/roles",
+    tags=["ROLES"]
 )

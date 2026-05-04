@@ -12,8 +12,14 @@ class UserService:
     def __init__(self, db: AsyncSession):
         self.repo = UserRepository(db)
 
-    async def register_user(self, first_name, last_name, email, password):
-        created_user = await self.repo.register_user(first_name, last_name, email, hash_password(password))
+    async def register_user(self, first_name, last_name, email, password, role_id):
+        created_user = await self.repo.register_user(
+            first_name,
+            last_name,
+            email,
+            hash_password(password),
+            role_id
+        )
 
         return UserRead(
             id=created_user.id,

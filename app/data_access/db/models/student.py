@@ -14,5 +14,14 @@ class Student(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), unique=True, nullable=False)
 
-    bookings = relationship("Booking", back_populates="student")    
+    bookings = relationship(
+        "Booking",
+        back_populates="student",
+        cascade="all, delete-orphan"  
+    )   
     user = relationship("User", back_populates="student")
+    favorites = relationship(
+        "Favorite",
+        back_populates="student",
+        cascade="all, delete-orphan"
+    )

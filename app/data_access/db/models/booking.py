@@ -19,7 +19,11 @@ class Booking(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
-    student_id = Column(UUID(as_uuid=True), ForeignKey("students.id"), nullable=False)
+    student_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("students.id", ondelete="CASCADE"), 
+        nullable=False
+    )
     schedule_id = Column(UUID(as_uuid=True), ForeignKey("schedules.id"), nullable=False)
 
     status = Column(String, default="pending")

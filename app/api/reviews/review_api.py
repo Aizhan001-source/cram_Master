@@ -39,7 +39,7 @@ async def get_review_by_id(
 async def create_review(
     data: ReviewCreate,
     service: ReviewService = Depends(get_review_service),
-    user=Depends(get_current_user(required_roles=["student", "tutor", "admin"])),
+    user=Depends(get_current_user(required_roles=["student"])),
 ):
     return await service.create_review(data)
 
@@ -48,6 +48,6 @@ async def create_review(
 async def delete_review(
     review_id: UUID,
     service: ReviewService = Depends(get_review_service),
-    user=Depends(get_current_user(required_roles=["student", "tutor", "admin"])),
+    user=Depends(get_current_user(required_roles=["student"])),
 ):
     return await service.delete_review(review_id)

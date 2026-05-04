@@ -7,8 +7,13 @@ async def seed_roles(db: AsyncSession):
     roles = ["admin", "student", "tutor"]
 
     for name in roles:
-        exists = await db.execute(select(Role).where(Role.name == name))
-        if not exists.scalar_one_or_none():
+        result = await db.execute(
+            select(Role).where(Role.name == name)
+        )
+        exists = result.scalar_one_or_none()
+
+        if not exists:
             db.add(Role(name=name))
 
     await db.commit()
+    print("Roles seeded!")

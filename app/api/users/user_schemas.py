@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Literal
 from pydantic import BaseModel, EmailStr
 from uuid import UUID
 
@@ -17,8 +17,7 @@ class UserCreate(BaseModel):
     last_name: str
     email: EmailStr
     password: str
-
-
+    role_id: UUID
 
 
 class UserLogin(BaseModel):

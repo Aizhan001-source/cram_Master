@@ -13,25 +13,25 @@ class UserRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def register_user(self, first_name, last_name, email, hashed_password):
+    async def register_user(self, first_name, last_name, email, hashed_password, role_id):
+
         result = await self.db.execute(
-            select(Role).where(Role.name == "student")
+            select(Role).where(Role.id == role_id)
         )
         role_object = result.scalar_one_or_none()
 
         if not role_object:
-            raise HTTPException(status_code=500, detail="Role 'student' not found")
-        
+            raise HTTPException(status_code=400, detail="Invalid role_id")
+
         user = User(
-        first_name=first_name,
-        last_name=last_name,
-        email=email,
-        password_hash=hashed_password,  # ✔ ВОТ ТАК
-        role_id=role_object.id,
-    )
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password_hash=hashed_password,
+            role_id=role_id,
+        )
 
         self.db.add(user)
-
         await self.db.commit()
         await self.db.refresh(user)
 
@@ -40,25 +40,13 @@ class UserRepository:
     async def login_user(self, email, hashed_password):
         result = await self.db.execute(
             select(User).where(
-                (User.email == email)
+                User.email == email,
+                User.password_hash == hashed_password
             )
         )
 
-        user_exists = result.scalar_one_or_none()
-
-        if user_exists:
-            user = await self.db.execute(
-                select(User).where(
-                     (User.email == email),
-                    (User.password_hash == hashed_password)
-                )
-            )
-
-
-            return user.scalar_one_or_none()
-
-        return None
-
+        return result.scalar_one_or_none()
+    
     async def get_all_users(self):
         result = await self.db.execute(
             select(User)
