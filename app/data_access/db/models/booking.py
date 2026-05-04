@@ -27,4 +27,5 @@ class Booking(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
 
     student = relationship("Student", back_populates="bookings")
-    schedule = relationship("Schedule", back_populates="bookings")    
+    schedule = relationship("Schedule", back_populates="bookings")   
+    payments = relationship("Payment", back_populates="booking") 

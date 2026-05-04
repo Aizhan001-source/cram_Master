@@ -45,6 +45,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from data_access.db.session import get_db
 from business_logic.users.user_service import UserService
 from uuid import UUID
+from api.users.user_schemas import CurrentUser
 
 security = HTTPBearer()
 

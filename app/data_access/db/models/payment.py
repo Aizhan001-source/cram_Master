@@ -27,3 +27,5 @@ class Payment(Base):
     status = Column(String, default="pending", nullable=False)
 
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())    
+
+    booking = relationship("Booking", back_populates="payments")

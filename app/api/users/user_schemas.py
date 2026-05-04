@@ -45,7 +45,7 @@ class UserAllRead(BaseModel):
     last_name: str
     email: str
     avatar_url: Optional[str] = None
-    role: Optional[RoleRead] = None  # связь с ролью
+    role: Optional[RoleRead] = None 
 
     model_config = {"from_attributes": True}
 
@@ -64,3 +64,7 @@ class UserProfileRead(BaseModel):
     email: str
 
     model_config= {"from_attributes":True}
+
+
+class CurrentUser(BaseModel):
+    id: UUID

@@ -1,35 +1,37 @@
-from fastapi import HTTPException, status
-from uuid import UUID
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from data_access.db.models.student import Student
+from data_access.db.models.user import User
+from data_access.db.models.role import Role
 
 
-class StudentService:
-    def __init__(self, repository):
-        self.repository = repository
+async def seed_students(db: AsyncSession):
+    # Получаем роль student
+    role_result = await db.execute(
+        select(Role).where(Role.name == "student")
+    )
+    student_role = role_result.scalar_one_or_none()
 
-    async def create_student(self, user_id: UUID) -> Student:
-        existing = await self.repository.get_by_user_id(user_id)
-        if existing:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Student already exists"
-            )
+    if not student_role:
+        raise Exception("Role 'student' not found")
 
-        return await self.repository.create(user_id)
+    # Получаем всех пользователей с этой ролью
+    users_result = await db.execute(
+        select(User).where(User.role_id == student_role.id)
+    )
+    users = users_result.scalars().all()
 
-    async def get_student(self, student_id: UUID) -> Student:
-        student = await self.repository.get_by_id(student_id)
-        if not student:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Student not found"
-            )
-        return student
+    for user in users:
+        # Проверяем, есть ли уже студент
+        exists = await db.execute(
+            select(Student).where(Student.user_id == user.id)
+        )
 
-    async def get_all_students(self) -> list[Student]:
-        return await self.repository.get_all()
+        if exists.scalar_one_or_none():
+            continue
 
-    async def delete_student(self, student_id: UUID):
-        student = await self.get_student(student_id)
-        await self.repository.delete(student)
+        db.add(Student(user_id=user.id))
+
+    await db.commit()
+    print("Students seeded!")
