@@ -13,7 +13,11 @@ class Course(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
-    tutor_id = Column(UUID(as_uuid=True), ForeignKey("tutors.id"), nullable=False)
+    tutor_id = Column(
+    UUID(as_uuid=True),
+    ForeignKey("tutors.id", ondelete="CASCADE"),
+    nullable=False
+)
     subject_id = Column(UUID(as_uuid=True), ForeignKey("subjects.id"), nullable=False)
 
     is_active = Column(Boolean, default=True)
@@ -21,4 +25,9 @@ class Course(Base):
 
     tutor = relationship("Tutor", back_populates="courses")
     subject = relationship("Subject", back_populates="courses")
-    schedules = relationship("Schedule", back_populates="course")    
+    schedules = relationship(
+    "Schedule",
+    back_populates="course",
+    cascade="all, delete-orphan",
+    passive_deletes=True
+)    

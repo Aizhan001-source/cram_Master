@@ -21,6 +21,9 @@ class UserService:
             role_id
         )
 
+        if await self._is_tutor_role(role_id):
+            await self.tutor_repo.create_tutor(created_user.id)
+
         return UserRead(
             id=created_user.id,
             first_name=created_user.first_name,
@@ -28,6 +31,9 @@ class UserService:
             email=created_user.email,
         )
 
+    async def _is_tutor_role(self, role_id):
+        return True  
+    
     async def login_user(self, email, password):
         hashed_password = hash_password(password)
         

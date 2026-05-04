@@ -1,29 +1,53 @@
-from datetime import datetime
-from decimal import Decimal
-from typing import Optional
-
 from pydantic import BaseModel
 from uuid import UUID
-from api.users.user_schemas import UserRead
+from typing import Optional, List
+from decimal import Decimal
+from datetime import datetime
 
 
-class EducationRead(BaseModel):
+class SubjectRead(BaseModel):
     id: UUID
     name: str
 
+    class Config:
+        from_attributes = True
 
-class TutorRead(BaseModel):
+
+# ---- Tutor ----
+class TutorBase(BaseModel):
+    bio: Optional[str] = None
+    experience_years: int = 0
+    price_per_hour: Decimal
+    currency: str = "KZT"
+
+
+class TutorCreate(TutorBase):
+    user_id: UUID
+    education_id: UUID
+    subject_ids: Optional[List[UUID]] = []
+
+
+class TutorUpdate(BaseModel):
+    bio: Optional[str] = None
+    experience_years: Optional[int] = None
+    price_per_hour: Optional[Decimal] = None
+    currency: Optional[str] = None
+    education_id: Optional[UUID] = None
+    subject_ids: Optional[List[UUID]] = None
+
+
+class TutorRead(TutorBase):
     id: UUID
-    bio: Optional[str]
-    experience_years: int
-    education: EducationRead
-    price_per_hour: Optional[Decimal]
-    currency: str
+    user_id: UUID
+    education_id: UUID
+
     average_rating: Decimal
     total_reviews: int
-    user: UserRead
 
     created_at: datetime
     updated_at: datetime
 
-    model_config = {"from_attributes": True} 
+    subjects: List[SubjectRead] = []
+
+    class Config:
+        from_attributes = True

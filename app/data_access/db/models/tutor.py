@@ -33,7 +33,12 @@ class Tutor(Base):
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     user = relationship("User", back_populates="tutor")
-    courses = relationship("Course", back_populates="tutor")
+    courses = relationship(
+    "Course",
+    back_populates="tutor",
+    cascade="all, delete-orphan",
+    passive_deletes=True
+)
     education = relationship("Education", back_populates="tutors")
 
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, unique=True)

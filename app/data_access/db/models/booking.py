@@ -24,12 +24,23 @@ class Booking(Base):
         ForeignKey("students.id", ondelete="CASCADE"), 
         nullable=False
     )
-    schedule_id = Column(UUID(as_uuid=True), ForeignKey("schedules.id"), nullable=False)
+    schedule_id = Column(
+    UUID(as_uuid=True),
+    ForeignKey("schedules.id", ondelete="CASCADE")
+)
 
-    status = Column(String, default="pending")
-
+    status = Column(
+    SqlEnum(BookingStatus),
+    default=BookingStatus.pending,
+    nullable=False
+)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
 
     student = relationship("Student", back_populates="bookings")
     schedule = relationship("Schedule", back_populates="bookings")   
-    payments = relationship("Payment", back_populates="booking") 
+    payments = relationship(
+    "Payment",
+    back_populates="booking",
+    cascade="all, delete-orphan",
+    passive_deletes=True
+)

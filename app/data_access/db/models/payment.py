@@ -21,8 +21,11 @@ class Payment(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
     course_student_id = Column(UUID(as_uuid=True), ForeignKey("course_students.id"), nullable=False)
-    booking_id = Column(UUID(as_uuid=True), ForeignKey("bookings.id"), nullable=False)
-
+    booking_id = Column(
+    UUID(as_uuid=True),
+    ForeignKey("bookings.id", ondelete="CASCADE"),
+    nullable=False
+)
     amount = Column(Numeric(10, 2), nullable=False)
     status = Column(String, default="pending", nullable=False)
 
