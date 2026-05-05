@@ -10,7 +10,7 @@ class StudentRepository:
         self.session = session
 
     async def create(self, user_id: UUID) -> Student:
-        student = Student(user_id=user_id)
+        student = Student(id=user_id)
         self.session.add(student)
         await self.session.commit()
         await self.session.refresh(student)
@@ -29,14 +29,6 @@ class StudentRepository:
             select(Student).options(selectinload(Student.user))
         )
         return result.scalars().all()
-
-    async def get_by_user_id(self, user_id: UUID):
-        result = await self.session.execute(
-            select(Student)
-            .where(Student.user_id == user_id)
-            .options(selectinload(Student.user))
-        )
-        return result.scalar_one_or_none()
 
     async def delete(self, student: Student):
         await self.session.delete(student)

@@ -3,6 +3,8 @@ from uuid import UUID
 from typing import Optional
 from datetime import datetime
 
+from api.users.user_schemas import UserRead
+
 
 class StudentCreate(BaseModel):
     user_id: UUID
@@ -16,16 +18,11 @@ class UserShort(BaseModel):
 
     model_config = {"from_attributes": True}
 
-
 class StudentRead(BaseModel):
     id: UUID
-    user_id: UUID
-
-    user: Optional[UserShort] = None
+    user: UserRead | None
 
     model_config = {"from_attributes": True}
-
-
 class StudentList(BaseModel):
     students: list[StudentRead]
 

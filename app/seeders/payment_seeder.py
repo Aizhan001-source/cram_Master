@@ -1,31 +1,30 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from decimal import Decimal
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from data_access.db.models.payment import Payment, PaymentStatus
 from data_access.db.models.booking import Booking
-from data_access.db.models.course_student import CourseStudent
 
 
 async def seed_payments(db: AsyncSession):
-    bookings = (await db.execute(select(Booking))).scalars().all()
-    course_students = (await db.execute(select(CourseStudent))).scalars().all()
 
-    if not bookings or not course_students:
-        print("Missing bookings or course_students")
+    bookings = (await db.execute(select(Booking))).scalars().all()
+
+    if not bookings:
         return
 
-    for i, booking in enumerate(bookings):
-        course_student = course_students[i % len(course_students)]
+    for booking in bookings:
 
-        db.add(
-            Payment(
-                course_student_id=course_student.id,
-                booking_id=booking.id,
-                amount=Decimal("100.00"),
-                status=PaymentStatus.completed.value if i % 2 == 0 else PaymentStatus.pending.value,
-            )
-        )
+        exists = (await db.execute(
+            select(Payment).where(Payment.booking_id == booking.id)
+        )).scalar_one_or_none()
+
+        if exists:
+            continue
+
+        db.add(Payment(
+            booking_id=booking.id,
+            amount=5000,  # или booking.price если есть
+            status=PaymentStatus.pending
+        ))
 
     await db.commit()
-    print("Payments seeded!")

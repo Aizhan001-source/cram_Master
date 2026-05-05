@@ -14,10 +14,10 @@ class Schedule(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
     course_id = Column(
-    UUID(as_uuid=True),
-    ForeignKey("courses.id", ondelete="CASCADE"),
-    nullable=False
-)
+        UUID(as_uuid=True),
+        ForeignKey("courses.id", ondelete="CASCADE"),
+        nullable=False
+    )
 
     start_time = Column(TIMESTAMP(timezone=True), server_default=func.now())
     end_time = Column(TIMESTAMP(timezone=True), server_default=func.now())
@@ -25,10 +25,3 @@ class Schedule(Base):
     is_available = Column(Boolean, default=True)
 
     course = relationship("Course", back_populates="schedules")
-    bookings = relationship(
-    "Booking",
-    back_populates="schedule",
-    cascade="all, delete-orphan",
-    passive_deletes=True
-)
-    

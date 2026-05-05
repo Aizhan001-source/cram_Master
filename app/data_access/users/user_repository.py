@@ -1,4 +1,4 @@
-from http.client import HTTPException
+from fastapi import HTTPException
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -13,15 +13,14 @@ class UserRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def register_user(self, first_name, last_name, email, hashed_password, role_id):
-
-        result = await self.db.execute(
-            select(Role).where(Role.id == role_id)
-        )
-        role_object = result.scalar_one_or_none()
-
-        if not role_object:
-            raise HTTPException(status_code=400, detail="Invalid role_id")
+    async def create_user(
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        hashed_password: str,
+        role_id
+    ) -> User:
 
         user = User(
             first_name=first_name,
@@ -32,8 +31,9 @@ class UserRepository:
         )
 
         self.db.add(user)
-        await self.db.commit()
-        await self.db.refresh(user)
+
+        # важно: чтобы user.id сразу появился
+        await self.db.flush()
 
         return user
 
@@ -50,7 +50,7 @@ class UserRepository:
     async def get_all_users(self):
         result = await self.db.execute(
             select(User)
-            .options(selectinload(User.roles))
+            .options(selectinload(User.role))
         )
 
         users = result.scalars().all()
@@ -79,3 +79,11 @@ class UserRepository:
         user = result.scalar_one_or_none()
         
         return user
+    
+    async def get_by_id(self, user_id: UUID):
+        result = await self.db.execute(
+            select(User)
+            .options(selectinload(User.role))
+            .where(User.id == user_id)
+        )
+        return result.scalar_one_or_none()

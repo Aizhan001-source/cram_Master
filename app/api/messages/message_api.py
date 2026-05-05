@@ -20,7 +20,7 @@ async def get_chats(
     service: MessageService = Depends(get_message_service),
     current_user=Depends(get_current_user(required_roles=["student", "admin", "tutor"]))
 ):
-    return await service.get_my_chats(current_user["user_id"])
+    return await service.get_my_chats(current_user.id)
 
 
 @router.get("/unread", response_model=UnreadCountResponse)
@@ -28,7 +28,7 @@ async def unread(
     service: MessageService = Depends(get_message_service),
     current_user=Depends(get_current_user(required_roles=["student", "admin", "tutor"])),
 ):
-    return await service.get_unread_count(current_user["user_id"])
+    return await service.get_unread_count(current_user.id)
 
 
 @router.post("/", response_model=MessageRead, status_code=status.HTTP_201_CREATED)
@@ -37,7 +37,7 @@ async def send_message(
     current_user=Depends(get_current_user(required_roles=["student", "admin", "tutor"])),
     service: MessageService = Depends(get_message_service),
 ):
-    return await service.send_message(current_user["user_id"], data)
+    return await service.send_message(current_user.id, data)
 
 
 @router.get("/{other_user_id}", response_model=list[MessageRead])
@@ -47,6 +47,6 @@ async def conversation(
     service: MessageService = Depends(get_message_service),
 ):
     return await service.get_conversation(
-        current_user["user_id"],
+        current_user.id,
         other_user_id,
     )

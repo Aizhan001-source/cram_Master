@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy.sql import func
 from enum import Enum
 from sqlalchemy.orm import relationship
-from sqlalchemy import (Column,  TIMESTAMP,  ForeignKey,  Enum as SqlEnum, String)
+from sqlalchemy import Column, TIMESTAMP, ForeignKey, Enum as SqlEnum, Integer
 
 from data_access.db.base import Base
 
@@ -14,33 +14,42 @@ class BookingStatus(str, Enum):
     cancelled = "cancelled"
     completed = "completed"
 
+
 class Booking(Base):
     __tablename__ = "bookings"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
-    student_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("students.id", ondelete="CASCADE"), 
-        nullable=False
-    )
-    schedule_id = Column(
-    UUID(as_uuid=True),
-    ForeignKey("schedules.id", ondelete="CASCADE")
-)
+    start_time = Column(TIMESTAMP(timezone=True), nullable=False)
+    end_time = Column(TIMESTAMP(timezone=True), nullable=False)   
+    duration_minutes = Column(Integer, nullable=True)
 
+    # FK → users (студент)
+
+    student_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+
+    # FK → tutors (профиль тьютора)
+
+    tutor_id = Column(UUID(as_uuid=True), ForeignKey("tutors.id"), nullable=False)
     status = Column(
-    SqlEnum(BookingStatus),
+    SqlEnum(BookingStatus, name="booking_status_enum"),
     default=BookingStatus.pending,
     nullable=False
 )
+
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
 
-    student = relationship("Student", back_populates="bookings")
-    schedule = relationship("Schedule", back_populates="bookings")   
-    payments = relationship(
-    "Payment",
-    back_populates="booking",
-    cascade="all, delete-orphan",
-    passive_deletes=True
-)
+    # relationships
+
+    student = relationship(
+        "User",
+        foreign_keys=[student_id],
+        back_populates="bookings"
+    )
+
+    tutor = relationship(
+        "Tutor",
+        foreign_keys=[tutor_id],
+        back_populates="bookings"
+    )
+    payments = relationship("Payment", back_populates="booking", cascade="all, delete-orphan")

@@ -2,6 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from uuid import UUID
 
+from sqlalchemy.orm import selectinload
+
 from data_access.db.models.booking import Booking
 
 
@@ -9,14 +11,7 @@ class BookingRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(
-        self,
-        student_id: UUID,
-        tutor_id: UUID,
-        start_time,
-        duration_minutes: int,
-        end_time,
-    ):
+    async def create(self, student_id, tutor_id, start_time, duration_minutes, end_time):
         booking = Booking(
             student_id=student_id,
             tutor_id=tutor_id,
@@ -26,7 +21,8 @@ class BookingRepository:
         )
 
         self.db.add(booking)
-        await self.db.flush()   # 👈 только flush
+        await self.db.commit()
+        await self.db.refresh(booking)
 
         return booking
 
@@ -38,6 +34,8 @@ class BookingRepository:
 
     async def get_by_id(self, booking_id: UUID):
         result = await self.db.execute(
-            select(Booking).where(Booking.id == booking_id)
+            select(Booking)
+            .where(Booking.id == booking_id)
+            .options(selectinload(Booking.student))  # optional
         )
         return result.scalar_one_or_none()

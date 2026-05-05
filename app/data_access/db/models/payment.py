@@ -5,6 +5,7 @@ from enum import Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy import (Column, String, TIMESTAMP,  ForeignKey,  Enum as SqlEnum, Numeric)
 
+from sqlalchemy.orm import relationship
 from data_access.db.base import Base
 
 
@@ -20,15 +21,16 @@ class Payment(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
-    course_student_id = Column(UUID(as_uuid=True), ForeignKey("course_students.id"), nullable=False)
-    booking_id = Column(
-    UUID(as_uuid=True),
-    ForeignKey("bookings.id", ondelete="CASCADE"),
-    nullable=False
-)
-    amount = Column(Numeric(10, 2), nullable=False)
-    status = Column(String, default="pending", nullable=False)
+    booking_id = Column(UUID(as_uuid=True), ForeignKey("bookings.id"), nullable=False)
 
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())    
+    amount = Column(Numeric(10, 2), nullable=False)
+
+    status = Column(
+        SqlEnum(PaymentStatus, name="payment_status_enum"),
+        default=PaymentStatus.pending,
+        nullable=False
+    )
+    
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
 
     booking = relationship("Booking", back_populates="payments")

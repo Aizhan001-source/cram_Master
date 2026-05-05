@@ -29,6 +29,7 @@ class PaymentRepository:
         )
         return result.scalar_one_or_none()
 
+    # 🔥 ГЛАВНЫЙ ФИКС — правильное имя метода
     async def get_by_student(self, student_id: UUID):
         result = await self.db.execute(
             select(Payment)

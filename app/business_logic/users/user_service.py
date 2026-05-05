@@ -7,33 +7,60 @@ import hashlib
 from utils.token_creator import create_access_token
 from sqlalchemy.ext.asyncio import AsyncSession
 from utils.password_hasher import hash_password
+from data_access.tutors.tutor_repository import TutorRepository
+from data_access.students.student_repository import StudentRepository
+from sqlalchemy import select
+from data_access.db.models.role import Role
 
 class UserService:
     def __init__(self, db: AsyncSession):
+        self.db = db
         self.repo = UserRepository(db)
+        self.tutor_repo = TutorRepository(db)
+        self.student_repo = StudentRepository(db)
 
-    async def register_user(self, first_name, last_name, email, password, role_id):
-        created_user = await self.repo.register_user(
+    async def _get_role_name(self, role_id):
+        result = await self.db.execute(
+            select(Role).where(Role.id == role_id)
+        )
+        role = result.scalar_one_or_none()
+        return role.name if role else None
+
+    async def register_user(
+        self,
+        first_name,
+        last_name,
+        email,
+        password,
+        role_id,
+        education_id=None
+    ):
+
+        hashed = hash_password(password)
+
+        user = await self.repo.create_user(
             first_name,
             last_name,
             email,
-            hash_password(password),
+            hashed,
             role_id
         )
 
-        if await self._is_tutor_role(role_id):
-            await self.tutor_repo.create_tutor(created_user.id)
+        role_name = await self._get_role_name(role_id)
 
-        return UserRead(
-            id=created_user.id,
-            first_name=created_user.first_name,
-            last_name=created_user.last_name,
-            email=created_user.email,
-        )
+        if role_name == "tutor":
+            if not education_id:
+                raise HTTPException(400, "education_id is required for tutor")
 
-    async def _is_tutor_role(self, role_id):
-        return True  
-    
+            await self.tutor_repo.create_tutor(user.id, education_id)
+
+        elif role_name == "student":
+            await self.student_repo.create(user.id)
+
+        await self.db.commit()
+
+        return user
+            
     async def login_user(self, email, password):
         hashed_password = hash_password(password)
         

@@ -19,7 +19,23 @@ async def user_register(
     user: UserCreate,
     service: UserService = Depends(get_user_service),
 ):
-    return await service.register_user(user.first_name, user.last_name, user.email, user.password, user.role_id)
+    try:
+        return await service.register_user(
+            first_name=user.first_name,
+            last_name=user.last_name,
+            email=user.email,
+            password=user.password,
+            role_id=user.role_id,
+            education_id=user.education_id
+        )
+
+    except HTTPException as e:
+        raise e
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise e
 
 
 @router.post("/login")

@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from api.users.user_api import router as users_router
 from api.tutors.tutor_api import router as tutor_router
 from api.messages.message_api import router as message_router
@@ -9,6 +10,7 @@ from api.reviews.review_api import router as review_router
 from api.courses.course_api import router as course_router
 from api.subjects.subject_api import router as subject_router
 from api.roles.role_api import router as role_api
+from api.favorites.favorite_router import router as favorites_router
 
 
 api_router = APIRouter()
@@ -71,4 +73,10 @@ api_router.include_router(
     role_api,
     prefix="/roles",
     tags=["ROLES"]
+)
+
+api_router.include_router(
+    favorites_router, 
+    prefix="/favorites",
+    tags=["FAVARITES"]
 )

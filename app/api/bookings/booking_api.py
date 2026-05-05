@@ -15,7 +15,6 @@ from api.bookings.booking_schemas import BookingRead, BookingCreate
 router = APIRouter()
 
 
-
 def get_service(db: AsyncSession = Depends(get_db)) -> BookingService:
     return BookingService(
         BookingRepository(db),
@@ -23,11 +22,11 @@ def get_service(db: AsyncSession = Depends(get_db)) -> BookingService:
         UserRepository(db)   
     )
 
-@router.post("/", response_model=BookingRead, status_code=201)
+@router.post("/", response_model=BookingRead)
 async def create_booking(
     data: BookingCreate,
     service: BookingService = Depends(get_service),
-    user: CurrentUser = Depends(get_current_user)
+    user=Depends(get_current_user(required_roles=["student"]))
 ):
     return await service.create(
         user.id,
@@ -36,9 +35,17 @@ async def create_booking(
         data.duration_minutes
     )
 
-@router.get("/", response_model=list[BookingRead])
+@router.get("/my", response_model=list[BookingRead])
 async def get_my_bookings(
     service: BookingService = Depends(get_service),
-    user: CurrentUser = Depends(get_current_user)
+    user=Depends(get_current_user(required_roles=["student"]))
 ):
     return await service.get_my(user.id)
+
+
+@router.get("/all", response_model=list[BookingRead])
+async def get_all_bookings(
+    service: BookingService = Depends(get_service),
+    user=Depends(get_current_user(required_roles=["admin", "tutor"]))
+):
+    return await service.get_all()

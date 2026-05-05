@@ -11,33 +11,18 @@ async def seed_messages(db: AsyncSession):
         print("Not enough users for messages")
         return
 
-    messages_data = [
-        {
-            "sender": users[0],
-            "receiver": users[1],
-            "content": "Hello! How are you?",
-        },
-        {
-            "sender": users[1],
-            "receiver": users[0],
-            "content": "I'm good, thanks!",
-        },
-        {
-            "sender": users[0],
-            "receiver": users[1],
-            "content": "Great to hear 👍",
-        },
+    exists = await db.execute(select(Message).limit(1))
+    if exists.scalar_one_or_none():
+        print("Messages already seeded")
+        return
+
+    messages = [
+        Message(sender_id=users[0].id, receiver_id=users[1].id, content="Hello! How are you?", is_read=False),
+        Message(sender_id=users[1].id, receiver_id=users[0].id, content="I'm good, thanks!", is_read=False),
+        Message(sender_id=users[0].id, receiver_id=users[1].id, content="Great to hear 👍", is_read=False),
     ]
 
-    for m in messages_data:
-        db.add(
-            Message(
-                sender_id=m["sender"].id,
-                receiver_id=m["receiver"].id,
-                content=m["content"],
-                is_read=False,
-            )
-        )
-
+    db.add_all(messages)
     await db.commit()
+
     print("Messages seeded!")

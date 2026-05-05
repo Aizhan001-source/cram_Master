@@ -10,6 +10,19 @@ class TutorRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    async def create_tutor(self, user_id, education_id):
+        tutor = Tutor(
+            user_id=user_id,
+            education_id=education_id
+        )
+
+        self.db.add(tutor)
+
+        # важно для получения id сразу
+        await self.db.flush()
+
+        return tutor
+
     async def get_all_tutors(self):
         result = await self.db.execute(
             select(Tutor).options(selectinload(Tutor.subjects))

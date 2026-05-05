@@ -1,8 +1,8 @@
-"""initial
+"""init
 
-Revision ID: 6e15acf923c3
+Revision ID: fd1b24a17391
 Revises: 
-Create Date: 2026-05-04 16:01:56.800074
+Create Date: 2026-05-05 10:46:09.597644
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '6e15acf923c3'
+revision: str = 'fd1b24a17391'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -49,9 +49,9 @@ def upgrade() -> None:
     sa.Column('avatar_url', sa.String(length=255), nullable=True),
     sa.Column('is_verified', sa.Boolean(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=True),
-    sa.Column('last_seen_at', sa.TIMESTAMP(), server_default=sa.text('now()'), nullable=True),
-    sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('now()'), nullable=True),
-    sa.Column('updated_at', sa.TIMESTAMP(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('last_seen_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('role_id', sa.UUID(), nullable=False),
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('id'),
@@ -70,10 +70,8 @@ def upgrade() -> None:
     )
     op.create_table('students',
     sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('user_id', sa.UUID(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('user_id')
+    sa.ForeignKeyConstraint(['id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('tutors',
     sa.Column('id', sa.UUID(), nullable=False),
@@ -90,9 +88,20 @@ def upgrade() -> None:
     sa.CheckConstraint('experience_years >= 0', name='check_experience'),
     sa.ForeignKeyConstraint(['education_id'], ['educations.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('education_id'),
-    sa.UniqueConstraint('user_id')
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('bookings',
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('start_time', sa.TIMESTAMP(timezone=True), nullable=False),
+    sa.Column('end_time', sa.TIMESTAMP(timezone=True), nullable=False),
+    sa.Column('duration_minutes', sa.Integer(), nullable=True),
+    sa.Column('student_id', sa.UUID(), nullable=False),
+    sa.Column('tutor_id', sa.UUID(), nullable=False),
+    sa.Column('status', sa.Enum('pending', 'confirmed', 'cancelled', 'completed', name='booking_status_enum'), nullable=False),
+    sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['student_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['tutor_id'], ['tutors.id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('courses',
     sa.Column('id', sa.UUID(), nullable=False),
@@ -101,8 +110,18 @@ def upgrade() -> None:
     sa.Column('is_active', sa.Boolean(), nullable=True),
     sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['subject_id'], ['subjects.id'], ),
-    sa.ForeignKeyConstraint(['tutor_id'], ['tutors.id'], ),
+    sa.ForeignKeyConstraint(['tutor_id'], ['tutors.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('favorites',
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('tutor_id', sa.UUID(), nullable=False),
+    sa.Column('student_id', sa.UUID(), nullable=False),
+    sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['student_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['tutor_id'], ['tutors.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('student_id', 'tutor_id', name='unique_favorite')
     )
     op.create_table('tutor_subjects',
     sa.Column('tutor_id', sa.UUID(), nullable=False),
@@ -120,15 +139,14 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['student_id'], ['students.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('favorites',
+    op.create_table('payments',
     sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('course_id', sa.UUID(), nullable=False),
-    sa.Column('student_id', sa.UUID(), nullable=False),
+    sa.Column('booking_id', sa.UUID(), nullable=False),
+    sa.Column('amount', sa.Numeric(precision=10, scale=2), nullable=False),
+    sa.Column('status', sa.Enum('pending', 'completed', 'failed', 'refunded', name='payment_status_enum'), nullable=False),
     sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['course_id'], ['courses.id'], ),
-    sa.ForeignKeyConstraint(['student_id'], ['students.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('student_id', 'course_id', name='unique_favorite')
+    sa.ForeignKeyConstraint(['booking_id'], ['bookings.id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('reviews',
     sa.Column('id', sa.UUID(), nullable=False),
@@ -148,28 +166,7 @@ def upgrade() -> None:
     sa.Column('start_time', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('end_time', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('is_available', sa.Boolean(), nullable=True),
-    sa.ForeignKeyConstraint(['course_id'], ['courses.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('bookings',
-    sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('student_id', sa.UUID(), nullable=False),
-    sa.Column('schedule_id', sa.UUID(), nullable=False),
-    sa.Column('status', sa.String(), nullable=True),
-    sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['schedule_id'], ['schedules.id'], ),
-    sa.ForeignKeyConstraint(['student_id'], ['students.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('payments',
-    sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('course_student_id', sa.UUID(), nullable=False),
-    sa.Column('booking_id', sa.UUID(), nullable=False),
-    sa.Column('amount', sa.Numeric(precision=10, scale=2), nullable=False),
-    sa.Column('status', sa.String(), nullable=False),
-    sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['booking_id'], ['bookings.id'], ),
-    sa.ForeignKeyConstraint(['course_student_id'], ['course_students.id'], ),
+    sa.ForeignKeyConstraint(['course_id'], ['courses.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
@@ -178,14 +175,14 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_table('payments')
-    op.drop_table('bookings')
     op.drop_table('schedules')
     op.drop_table('reviews')
-    op.drop_table('favorites')
+    op.drop_table('payments')
     op.drop_table('course_students')
     op.drop_table('tutor_subjects')
+    op.drop_table('favorites')
     op.drop_table('courses')
+    op.drop_table('bookings')
     op.drop_table('tutors')
     op.drop_table('students')
     op.drop_table('messages')
