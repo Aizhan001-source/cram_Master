@@ -11,12 +11,12 @@ async def seed_students(db: AsyncSession):
 
     for user in users:
         result = await db.execute(
-            select(Student).where(Student.user_id == user.id)
+            select(Student).where(Student.id == user.id)
         )
         exists = result.scalar_one_or_none()
 
         if not exists:
-            db.add(Student(user_id=user.id))
-
+            db.add(Student(id=user.id))
+            
     await db.commit()
     print("Students seeded!")

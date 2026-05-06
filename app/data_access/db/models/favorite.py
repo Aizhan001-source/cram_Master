@@ -13,20 +13,15 @@ class Favorite(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
-    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id"), nullable=False)
-
-    student_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("students.id", ondelete="CASCADE"),
-        nullable=False
-    )
+    tutor_id = Column(UUID(as_uuid=True), ForeignKey("tutors.id"), nullable=False)
+    
+    student_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)  # 🔥 FIX
 
     __table_args__ = (
-        UniqueConstraint("student_id", "course_id", name="unique_favorite"),
+        UniqueConstraint("student_id", "tutor_id", name="unique_favorite"),
     )
 
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
 
-    # ✅ только один relationship
-    student = relationship("Student", back_populates="favorites")
-    course = relationship("Course")
+    student = relationship("User") 
+    tutor = relationship("Tutor")

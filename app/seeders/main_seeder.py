@@ -6,22 +6,18 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from data_access.db.session import AsyncSessionLocal
 
-from .role_seeder import seed_roles
-from .education_seeder import seed_educations
-from .subject_seeder import seed_subjects
-
-from .user_seeder import seed_users
-from .student_seeder import seed_students
-from .tutor_seeder import seed_tutors
-
-from .courses_seeder import seed_courses
-from .schedule_seeder import seed_schedules
-
-from .booking_seeder import seed_bookings
-from .payment_seeder import seed_payments
-
-from .review_seeder import seed_reviews
-from .favorite_seeder import seed_favorites
+from seeders.role_seeder import seed_roles
+from seeders.education_seeder import seed_educations
+from seeders.subject_seeder import seed_subjects
+from seeders.user_seeder import seed_users
+from seeders.student_seeder import seed_students
+from seeders.tutor_seeder import seed_tutors
+from seeders.courses_seeder import seed_courses
+from seeders.schedule_seeder import seed_schedules
+from seeders.booking_seeder import seed_bookings
+from seeders.payment_seeder import seed_payments
+from seeders.review_seeder import seed_reviews
+from seeders.favorite_seeder import seed_favorites
 
 
 async def main():

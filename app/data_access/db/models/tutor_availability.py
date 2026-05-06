@@ -6,8 +6,8 @@ from sqlalchemy.sql import func
 from data_access.db.base import Base
 
 
-class User_roles(Base):
-    __tablename__ = "user_roles"
+class TutorAvailability(Base):
+    __tablename__ = "tutor_availability"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 

@@ -19,11 +19,16 @@ class UserService:
         self.tutor_repo = TutorRepository(db)
         self.student_repo = StudentRepository(db)
 
+<<<<<<< HEAD
     async def _get_role_name(self, role_id):
+=======
+    async def _get_role_name(self, role_id: UUID):
+>>>>>>> 7431d622914a6d09f8e134a327ab5906690e013e
         result = await self.db.execute(
             select(Role).where(Role.id == role_id)
         )
         role = result.scalar_one_or_none()
+<<<<<<< HEAD
         return role.name if role else None
 
     async def register_user(
@@ -36,6 +41,28 @@ class UserService:
         education_id=None
     ):
 
+=======
+
+        if not role:
+            raise HTTPException(400, "Invalid role_id")  # 🔥 ВАЖНО
+
+        return role.name
+
+    async def register_user(
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        password: str,
+        role_id: UUID,
+        education_id: UUID | None = None
+    ):
+
+        existing = await self.repo.get_by_email(email)
+        if existing:
+            raise HTTPException(400, "Email already registered")
+
+>>>>>>> 7431d622914a6d09f8e134a327ab5906690e013e
         hashed = hash_password(password)
 
         user = await self.repo.create_user(

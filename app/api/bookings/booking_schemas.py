@@ -18,5 +18,7 @@ class BookingRead(BaseModel):
     tutor_id: UUID
     status: BookingStatus
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
+    

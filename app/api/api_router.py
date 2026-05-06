@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from api.users.user_api import router as users_router
 from api.tutors.tutor_api import router as tutor_router
 from api.messages.message_api import router as message_router
@@ -10,6 +11,9 @@ from api.courses.course_api import router as course_router
 from api.subjects.subject_api import router as subject_router
 from api.roles.role_api import router as role_api
 from api.schedules.schedule_api import router as schedule_router
+from api.favorites.favorite_api import router as favorite_router
+from api.educations.education_api import router as education_router
+
 
 api_router = APIRouter()
 
@@ -77,4 +81,16 @@ api_router.include_router(
     schedule_router,
     prefix="/schedule",
     tags=["SCHEDULE"]
+)
+
+api_router.include_router(
+    favorite_router, 
+    prefix="/favorites",
+    tags=["FAVORITES"]
+)
+
+api_router.include_router(
+    education_router, 
+    prefix="/educations",
+     tags=["EDUCATIONS"]
 )

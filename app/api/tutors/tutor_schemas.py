@@ -17,7 +17,7 @@ class SubjectRead(BaseModel):
 class TutorBase(BaseModel):
     bio: Optional[str] = None
     experience_years: int = 0
-    price_per_hour: Decimal
+    price_per_hour: Optional[Decimal] = None
     currency: str = "KZT"
 
 
@@ -41,8 +41,8 @@ class TutorRead(TutorBase):
     user_id: UUID
     education_id: UUID
 
-    average_rating: Decimal
-    total_reviews: int
+    price_per_hour: Optional[Decimal] = None
+    average_rating: Optional[Decimal] = 0
 
     created_at: datetime
     updated_at: datetime

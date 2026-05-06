@@ -32,18 +32,19 @@ class Tutor(Base):
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    education_id = Column(UUID(as_uuid=True), ForeignKey("educations.id"), nullable=False)
+
     user = relationship("User", back_populates="tutor")
-    courses = relationship(
-    "Course",
-    back_populates="tutor",
-    cascade="all, delete-orphan",
-    passive_deletes=True
-)
     education = relationship("Education", back_populates="tutors")
+<<<<<<< HEAD
 
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, unique=True)
     education_id = Column(UUID(as_uuid=True), ForeignKey("educations.id"), nullable=False)
 
+=======
+    courses = relationship("Course", back_populates="tutor")
+>>>>>>> 7431d622914a6d09f8e134a327ab5906690e013e
     
     __table_args__ = (
         CheckConstraint("experience_years >= 0", name="check_experience"),
@@ -53,4 +54,10 @@ class Tutor(Base):
         "Subject",
         secondary="tutor_subjects",
         back_populates="tutors"
+    )
+    
+    bookings = relationship(
+    "Booking",
+    foreign_keys="Booking.tutor_id",
+    back_populates="tutor"
     )
