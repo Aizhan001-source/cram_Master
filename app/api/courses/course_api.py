@@ -15,7 +15,6 @@ from utils.auth_middleware import get_current_user
 
 router = APIRouter()
 
-
 def get_course_service(db: AsyncSession = Depends(get_db)) -> CourseService:
     return CourseService(db)
 
