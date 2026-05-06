@@ -9,7 +9,7 @@ from api.reviews.review_api import router as review_router
 from api.courses.course_api import router as course_router
 from api.subjects.subject_api import router as subject_router
 from api.roles.role_api import router as role_api
-
+from api.schedules.schedule_api import router as schedule_router
 
 api_router = APIRouter()
 
@@ -71,4 +71,10 @@ api_router.include_router(
     role_api,
     prefix="/roles",
     tags=["ROLES"]
+)
+
+api_router.include_router(
+    schedule_router,
+    prefix="/schedule",
+    tags=["SCHEDULE"]
 )

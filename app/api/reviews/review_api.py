@@ -51,3 +51,10 @@ async def delete_review(
     user=Depends(get_current_user(required_roles=["student"])),
 ):
     return await service.delete_review(review_id)
+
+@router.get("/tutor/{tutor_id}", response_model=list[ReviewRead])
+async def get_reviews_by_tutor(
+    tutor_id: UUID,
+    service: ReviewService = Depends(get_review_service),
+):
+    return await service.get_by_tutor_id(tutor_id)

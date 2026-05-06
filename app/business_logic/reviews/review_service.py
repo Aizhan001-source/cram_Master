@@ -14,21 +14,24 @@ class ReviewService:
         self.repo = ReviewRepository(db)
         self.db = db
 
+    # async def get_all_reviews(self):
+    #     reviews = await self.repo.get_all_reviews()
+
+    #     return [
+    #         ReviewRead(
+    #             id=r.id,
+    #             student_id=r.student_id,
+    #             course_id=r.course_id,
+    #             rating=r.rating,
+    #             comment=r.comment,
+    #             average_rating=0.0,  # нет avg в этом запросе
+    #         )
+    #         for r in reviews
+    #     ]
     async def get_all_reviews(self):
         reviews = await self.repo.get_all_reviews()
-
-        return [
-            ReviewRead(
-                id=r.id,
-                student_id=r.student_id,
-                course_id=r.course_id,
-                rating=r.rating,
-                comment=r.comment,
-                average_rating=0.0,  # нет avg в этом запросе
-            )
-            for r in reviews
-        ]
-
+        return reviews  # отдаём ORM объекты напрямую, схема сама сериализует через from_attributes
+    
     async def get_review_by_id(self, review_id: UUID):
         review = await self.repo.get_review_by_id(review_id)
 
@@ -105,3 +108,5 @@ class ReviewService:
             "average_rating": rating_data["average_rating"],
             "total_reviews": rating_data["total_reviews"],
         }
+    async def get_by_tutor_id(self, tutor_id: UUID):
+        return await self.repo.get_by_tutor_id(tutor_id)

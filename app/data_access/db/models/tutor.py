@@ -42,7 +42,7 @@ class Tutor(Base):
     education = relationship("Education", back_populates="tutors")
 
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, unique=True)
-    education_id = Column(UUID(as_uuid=True), ForeignKey("educations.id"), nullable=False, unique=True)
+    education_id = Column(UUID(as_uuid=True), ForeignKey("educations.id"), nullable=False)
 
     
     __table_args__ = (
