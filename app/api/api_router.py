@@ -10,7 +10,8 @@ from api.reviews.review_api import router as review_router
 from api.courses.course_api import router as course_router
 from api.subjects.subject_api import router as subject_router
 from api.roles.role_api import router as role_api
-from api.favorites.favorite_router import router as favorites_router
+from api.favorites.favorite_api import router as favorite_router
+from api.educations.education_api import router as education_router
 
 
 api_router = APIRouter()
@@ -76,7 +77,14 @@ api_router.include_router(
 )
 
 api_router.include_router(
-    favorites_router, 
+    favorite_router, 
     prefix="/favorites",
     tags=["FAVARITES"]
+)
+
+
+api_router.include_router(
+    education_router, 
+    prefix="/educations",
+     tags=["EDUCATIONS"]
 )

@@ -18,7 +18,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     role_id: UUID
-    education_id: UUID | None = None 
+    education_id: UUID | None = None
 
 
 class UserLogin(BaseModel):

@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
+from uuid import UUID
 
 from data_access.db.models.tutor import Tutor
 from data_access.db.models.subject import Subject
@@ -10,15 +11,13 @@ class TutorRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create_tutor(self, user_id, education_id):
+    async def create_tutor(self, user_id: UUID, education_id: UUID):
         tutor = Tutor(
             user_id=user_id,
             education_id=education_id
         )
 
         self.db.add(tutor)
-
-        # важно для получения id сразу
         await self.db.flush()
 
         return tutor

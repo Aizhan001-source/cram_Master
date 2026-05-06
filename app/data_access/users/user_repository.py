@@ -13,13 +13,19 @@ class UserRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    async def get_by_email(self, email: str):
+        result = await self.db.execute(
+            select(User).where(User.email == email)
+        )
+        return result.scalar_one_or_none()
+
     async def create_user(
         self,
         first_name: str,
         last_name: str,
         email: str,
         hashed_password: str,
-        role_id
+        role_id: UUID
     ) -> User:
 
         user = User(
@@ -31,9 +37,7 @@ class UserRepository:
         )
 
         self.db.add(user)
-
-        # важно: чтобы user.id сразу появился
-        await self.db.flush()
+        await self.db.flush()  # получаем user.id
 
         return user
 
